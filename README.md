@@ -1,0 +1,1 @@
+Multi-thread version of redis (key-value DB) implemented by go
