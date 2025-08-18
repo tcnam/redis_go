@@ -3,6 +3,7 @@ package threadpool
 import (
 	"log"
 	"net"
+	"redis_go/internal/config"
 )
 
 type MultiThreadServer struct {
@@ -35,7 +36,7 @@ func (server *MultiThreadServer) InitWorkerPool() {
 }
 
 func (server *MultiThreadServer) Start() error {
-	var ln, err = net.Listen("tcp", server.listenAddr)
+	var ln, err = net.Listen(config.Protocol, server.listenAddr)
 	if err != nil {
 		return err
 	}
