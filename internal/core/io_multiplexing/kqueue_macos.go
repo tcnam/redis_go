@@ -4,8 +4,9 @@ package io_multiplexing
 
 import (
 	"log"
-	"redis_go/internal/config"
 	"syscall"
+
+	"github.com/tcnam/redis_go/internal/config"
 )
 
 type KQueue struct {

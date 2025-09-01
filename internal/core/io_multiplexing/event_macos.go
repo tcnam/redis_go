@@ -17,6 +17,7 @@ func CreateEvent(ke syscall.Kevent_t) Event {
 	default:
 		log.Fatalf("Kevent_t filter not support: %d\n", ke.Filter)
 	}
+
 	return Event{
 		Fd:        ke.Ident,
 		operation: operation,

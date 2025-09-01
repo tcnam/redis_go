@@ -5,9 +5,10 @@ import (
 	"io"
 	"log"
 	"net"
-	"redis_go/internal/config"
-	"redis_go/internal/core/io_multiplexing"
 	"syscall"
+
+	"github.com/tcnam/redis_go/internal/config"
+	"github.com/tcnam/redis_go/internal/core/io_multiplexing"
 )
 
 type IOMultiplexerServer struct {
@@ -36,12 +37,12 @@ func (server *IOMultiplexerServer) Start() error {
 	server.listener = listener
 
 	// Get the file descriptor from the listener
-	tcpListerner, ok := server.listener.(*net.TCPListener)
+	tcpListener, ok := server.listener.(*net.TCPListener)
 	if !ok {
 		log.Fatal("Listener is not a TCPListener")
 	}
 
-	listenerFile, err := tcpListerner.File()
+	listenerFile, err := tcpListener.File()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -49,12 +50,15 @@ func (server *IOMultiplexerServer) Start() error {
 
 	serverFd := uint64(listenerFile.Fd())
 
+	// Create new IOMultiPlexer instance
 	ioMuliplexer, err := io_multiplexing.CreateIOMultiplexer()
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer ioMuliplexer.Close()
 
+	// Add TCP server listener to IOMultiplexer instance for monitoring
+	// Register serverFD for read event -> wake when new client connect
 	err = ioMuliplexer.Monitor(
 		io_multiplexing.NewEvent(serverFd, io_multiplexing.OpRead),
 	)
@@ -64,12 +68,9 @@ func (server *IOMultiplexerServer) Start() error {
 	}
 
 	var events []io_multiplexing.Event = make([]io_multiplexing.Event, config.MaxConnection)
-	// var lastActiveExpireExecTime = time.Now()
 
 	for {
-		// if time.Now().After(lastActiveExpireExecTime.Add(constant.ActiveExpireFrequency)) {
-		// 	io_multiplexing
-		// }
+		// Block until new client or client send data
 		events, err = ioMuliplexer.Wait()
 		if err != nil {
 			continue

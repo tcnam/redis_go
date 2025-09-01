@@ -1,8 +1,8 @@
 package main
 
 import (
-	"redis_go/internal/config"
-	"redis_go/internal/server/iomultiplexer"
+	"github.com/tcnam/redis_go/internal/config"
+	"github.com/tcnam/redis_go/internal/server/iomultiplexer"
 )
 
 func main() {

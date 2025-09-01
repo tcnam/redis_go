@@ -3,7 +3,8 @@ package threadpool
 import (
 	"log"
 	"net"
-	"redis_go/internal/config"
+
+	"github.com/tcnam/redis_go/internal/config"
 )
 
 type MultiThreadServer struct {

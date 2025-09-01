@@ -1,1 +1,3 @@
-module redis_go
+module github.com/tcnam/redis_go
+
+go 1.21
