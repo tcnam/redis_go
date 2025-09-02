@@ -7,3 +7,6 @@ run:
 
 test:
 	go test -v ./..
+
+test_protocol:
+	go test -v ./internal/core/protocol
