@@ -2,42 +2,48 @@ package protocol_test
 
 import (
 	"bytes"
+	"log"
 	"testing"
 
 	"github.com/tcnam/redis_go/internal/core/protocol"
 )
 
 type TestCaseEncode struct {
-	input          interface{}
-	expectedOutput []byte
+	input  interface{}
+	output []byte
+}
+
+type TestCaseDecode struct {
+	input  []byte
+	output interface{}
 }
 
 func TestEncodeSimpleString(t *testing.T) {
 	var testCases []TestCaseEncode = make([]TestCaseEncode, 0, 6)
 
 	var testCase1 TestCaseEncode = TestCaseEncode{
-		input:          "OK",
-		expectedOutput: []byte("+OK\r\n"),
+		input:  "OK",
+		output: []byte("+OK\r\n"),
 	}
 	var testCase2 TestCaseEncode = TestCaseEncode{
-		input:          "PONG",
-		expectedOutput: []byte("+PONG\r\n"),
+		input:  "PONG",
+		output: []byte("+PONG\r\n"),
 	}
 	var testCase3 TestCaseEncode = TestCaseEncode{
-		input:          "QUEUED",
-		expectedOutput: []byte("+QUEUED\r\n"),
+		input:  "QUEUED",
+		output: []byte("+QUEUED\r\n"),
 	}
 	var testCase4 TestCaseEncode = TestCaseEncode{
-		input:          "RESET",
-		expectedOutput: []byte("+RESET\r\n"),
+		input:  "RESET",
+		output: []byte("+RESET\r\n"),
 	}
 	var testCase5 TestCaseEncode = TestCaseEncode{
-		input:          "CONTINUE",
-		expectedOutput: []byte("+CONTINUE\r\n"),
+		input:  "CONTINUE",
+		output: []byte("+CONTINUE\r\n"),
 	}
 	var testCase6 TestCaseEncode = TestCaseEncode{
-		input:          "NOAUTH",
-		expectedOutput: []byte("+NOAUTH\r\n"),
+		input:  "NOAUTH",
+		output: []byte("+NOAUTH\r\n"),
 	}
 
 	testCases = append(testCases, testCase1, testCase2, testCase3, testCase4, testCase5, testCase6)
@@ -45,8 +51,8 @@ func TestEncodeSimpleString(t *testing.T) {
 	for i := 0; i < len(testCases); i++ {
 		realOutput := protocol.Encode(testCases[i].input, true)
 		// log.Printf("%q", realOutput)
-		// log.Printf("%q", testCases[i].expectedOutput)
-		if !bytes.Equal(realOutput, testCases[i].expectedOutput) {
+		// log.Printf("%q", testCases[i].output)
+		if !bytes.Equal(realOutput, testCases[i].output) {
 			t.Fail()
 		}
 	}
@@ -56,12 +62,12 @@ func TestEncodeBulkString(t *testing.T) {
 	var testCases []TestCaseEncode = make([]TestCaseEncode, 0, 2)
 
 	var testCase1 TestCaseEncode = TestCaseEncode{
-		input:          "Hello",
-		expectedOutput: []byte("$5\r\nHello\r\n"),
+		input:  "Hello",
+		output: []byte("$5\r\nHello\r\n"),
 	}
 	var testCase2 TestCaseEncode = TestCaseEncode{
-		input:          "Hello World",
-		expectedOutput: []byte("$11\r\nHello World\r\n"),
+		input:  "Hello World",
+		output: []byte("$11\r\nHello World\r\n"),
 	}
 
 	testCases = append(testCases, testCase1, testCase2)
@@ -69,8 +75,8 @@ func TestEncodeBulkString(t *testing.T) {
 	for i := 0; i < len(testCases); i++ {
 		realOutput := protocol.Encode(testCases[i].input, false)
 		// log.Printf("%q", realOutput)
-		// log.Printf("%q", testCases[i].expectedOutput)
-		if !bytes.Equal(realOutput, testCases[i].expectedOutput) {
+		// log.Printf("%q", testCases[i].output)
+		if !bytes.Equal(realOutput, testCases[i].output) {
 			t.Fail()
 		}
 	}
@@ -80,16 +86,16 @@ func TestEncodeInteger(t *testing.T) {
 	var testCases []TestCaseEncode = make([]TestCaseEncode, 0, 2)
 
 	var testCase1 TestCaseEncode = TestCaseEncode{
-		input:          0,
-		expectedOutput: []byte(":0\r\n"),
+		input:  0,
+		output: []byte(":0\r\n"),
 	}
 	var testCase2 TestCaseEncode = TestCaseEncode{
-		input:          123,
-		expectedOutput: []byte(":123\r\n"),
+		input:  123,
+		output: []byte(":123\r\n"),
 	}
 	var testCase3 TestCaseEncode = TestCaseEncode{
-		input:          -123,
-		expectedOutput: []byte(":-123\r\n"),
+		input:  -123,
+		output: []byte(":-123\r\n"),
 	}
 
 	testCases = append(testCases, testCase1, testCase2, testCase3)
@@ -97,8 +103,8 @@ func TestEncodeInteger(t *testing.T) {
 	for i := 0; i < len(testCases); i++ {
 		realOutput := protocol.Encode(testCases[i].input, false)
 		// log.Printf("%q", realOutput)
-		// log.Printf("%q", testCases[i].expectedOutput)
-		if !bytes.Equal(realOutput, testCases[i].expectedOutput) {
+		// log.Printf("%q", testCases[i].output)
+		if !bytes.Equal(realOutput, testCases[i].output) {
 			t.Fail()
 		}
 	}
@@ -108,16 +114,16 @@ func TestEncodeStringArray(t *testing.T) {
 	var testCases []TestCaseEncode = make([]TestCaseEncode, 0, 3)
 
 	var testCase1 TestCaseEncode = TestCaseEncode{
-		input:          []string{},
-		expectedOutput: []byte("*0\r\n"),
+		input:  []string{},
+		output: []byte("*0\r\n"),
 	}
 	var testCase2 TestCaseEncode = TestCaseEncode{
-		input:          []string{"hello"},
-		expectedOutput: []byte("*1\r\n$5\r\nhello\r\n"),
+		input:  []string{"hello"},
+		output: []byte("*1\r\n$5\r\nhello\r\n"),
 	}
 	var testCase3 TestCaseEncode = TestCaseEncode{
-		input:          []string{"foo", "bar"},
-		expectedOutput: []byte("*2\r\n$3\r\nfoo\r\n$3\r\nbar\r\n"),
+		input:  []string{"foo", "bar"},
+		output: []byte("*2\r\n$3\r\nfoo\r\n$3\r\nbar\r\n"),
 	}
 
 	testCases = append(testCases, testCase1, testCase2, testCase3)
@@ -125,8 +131,8 @@ func TestEncodeStringArray(t *testing.T) {
 	for i := 0; i < len(testCases); i++ {
 		realOutput := protocol.Encode(testCases[i].input, false)
 		// log.Printf("%q", realOutput)
-		// log.Printf("%q", testCases[i].expectedOutput)
-		if !bytes.Equal(realOutput, testCases[i].expectedOutput) {
+		// log.Printf("%q", testCases[i].output)
+		if !bytes.Equal(realOutput, testCases[i].output) {
 			t.Fail()
 		}
 	}
@@ -136,16 +142,16 @@ func TestEncodeInterfaceArray(t *testing.T) {
 	var testCases []TestCaseEncode = make([]TestCaseEncode, 0, 3)
 
 	var testCase1 TestCaseEncode = TestCaseEncode{
-		input:          []interface{}{"foo", "bar"},
-		expectedOutput: []byte("*2\r\n$3\r\nfoo\r\n$3\r\nbar\r\n"),
+		input:  []interface{}{"foo", "bar"},
+		output: []byte("*2\r\n$3\r\nfoo\r\n$3\r\nbar\r\n"),
 	}
 	var testCase2 TestCaseEncode = TestCaseEncode{
-		input:          []interface{}{-42, "hello"},
-		expectedOutput: []byte("*2\r\n:-42\r\n$5\r\nhello\r\n"),
+		input:  []interface{}{-42, "hello"},
+		output: []byte("*2\r\n:-42\r\n$5\r\nhello\r\n"),
 	}
 	var testCase3 TestCaseEncode = TestCaseEncode{
-		input:          []interface{}{},
-		expectedOutput: []byte("*0\r\n"),
+		input:  []interface{}{},
+		output: []byte("*0\r\n"),
 	}
 
 	testCases = append(testCases, testCase1, testCase2, testCase3)
@@ -153,8 +159,76 @@ func TestEncodeInterfaceArray(t *testing.T) {
 	for i := 0; i < len(testCases); i++ {
 		realOutput := protocol.Encode(testCases[i].input, false)
 		// log.Printf("%q", realOutput)
-		// log.Printf("%q", testCases[i].expectedOutput)
-		if !bytes.Equal(realOutput, testCases[i].expectedOutput) {
+		// log.Printf("%q", testCases[i].output)
+		if !bytes.Equal(realOutput, testCases[i].output) {
+			t.Fail()
+		}
+	}
+}
+
+func TestDecodeSimpleString(t *testing.T) {
+	var testCases []TestCaseDecode = make([]TestCaseDecode, 0, 6)
+
+	var testCase1 TestCaseDecode = TestCaseDecode{
+		input:  []byte("+OK\r\n"),
+		output: "OK",
+	}
+	var testCase2 TestCaseDecode = TestCaseDecode{
+		input:  []byte("+PONG\r\n"),
+		output: "PONG",
+	}
+	var testCase3 TestCaseDecode = TestCaseDecode{
+		input:  []byte("+QUEUED\r\n"),
+		output: "QUEUED",
+	}
+	var testCase4 TestCaseDecode = TestCaseDecode{
+		input:  []byte("+RESET\r\n"),
+		output: "RESET",
+	}
+	var testCase5 TestCaseDecode = TestCaseDecode{
+		input:  []byte("+CONTINUE\r\n"),
+		output: "CONTINUE",
+	}
+	var testCase6 TestCaseDecode = TestCaseDecode{
+		input:  []byte("+NOAUTH\r\n"),
+		output: "NOAUTH",
+	}
+
+	testCases = append(testCases, testCase1, testCase2, testCase3, testCase4, testCase5, testCase6)
+	for i := 0; i < len(testCases); i++ {
+		realOutput, _, _ := protocol.Decode(testCases[i].input)
+		// log.Printf("%q", realOutput)
+		// log.Printf("%q", testCases[i].output)
+		if realOutput != testCases[i].output {
+			t.Fail()
+		}
+	}
+}
+
+func TestDecodeInteger(t *testing.T) {
+	var testCases []TestCaseDecode = make([]TestCaseDecode, 0, 4)
+	var testCase1 TestCaseDecode = TestCaseDecode{
+		input:  []byte(":0\r\n"),
+		output: int64(0),
+	}
+	var testCase2 TestCaseDecode = TestCaseDecode{
+		input:  []byte(":1000\r\n"),
+		output: int64(1000),
+	}
+	var testCase3 TestCaseDecode = TestCaseDecode{
+		input:  []byte(":+1000\r\n"),
+		output: int64(1000),
+	}
+	var testCase4 TestCaseDecode = TestCaseDecode{
+		input:  []byte(":-1000\r\n"),
+		output: int64(-1000),
+	}
+	testCases = append(testCases, testCase1, testCase2, testCase3, testCase4)
+	for i := 0; i < len(testCases); i++ {
+		realOutput, _, _ := protocol.Decode(testCases[i].input)
+		log.Println(realOutput)
+		log.Println(testCases[i].output)
+		if realOutput != testCases[i].output {
 			t.Fail()
 		}
 	}

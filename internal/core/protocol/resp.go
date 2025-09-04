@@ -76,7 +76,7 @@ func encodeInterfaceArray(ia []interface{}) []byte {
 
 func Decode(data []byte) (interface{}, int, error) {
 	if len(data) == 0 {
-		return nil, 0, errors.New("No data")
+		return nil, 0, errors.New("no data")
 	}
 	switch data[0] {
 	case '+':
@@ -110,6 +110,7 @@ func decodeInteger(data []byte) (int64, int, error) {
 	for data[pos] != '\r' {
 		// substract ANSI digit with ANSI of '0' digit to get its value in integer
 		res = res*10 + int64(data[pos]-'0')
+		pos++
 	}
 	return sign * res, pos + 2, nil
 }
