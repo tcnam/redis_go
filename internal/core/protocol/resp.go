@@ -19,7 +19,7 @@ func Encode(value interface{}, isSimpleString bool) []byte {
 	case int64, int32, int16, int8, int:
 		return encodeInteger(v)
 	case error:
-		return encodeError(v)
+		return encodeSimpleError(v)
 	case []string:
 		return encodeStringArray(v)
 	case [][]string:
@@ -43,7 +43,7 @@ func encodeInteger(value interface{}) []byte {
 	return []byte(fmt.Sprintf(":%d%s", value, constant.CRLF))
 }
 
-func encodeError(value error) []byte {
+func encodeSimpleError(value error) []byte {
 	return []byte(fmt.Sprintf("-%s%s", value, constant.CRLF))
 }
 
@@ -81,8 +81,14 @@ func Decode(data []byte) (interface{}, int, error) {
 	switch data[0] {
 	case '+':
 		return decodeSimpleString(data)
+	case '-':
+		return decodeSimpleError(data)
 	case ':':
 		return decodeInteger(data)
+	case '$':
+		return decodeBulkString(data)
+	case '*':
+		return decodeArray(data)
 	}
 	return nil, 0, nil
 }
@@ -99,6 +105,7 @@ func decodeInteger(data []byte) (int64, int, error) {
 	var res int64 = 0
 	var pos int = 1
 	var sign int64 = 1
+
 	switch data[pos] {
 	case '-':
 		sign = -1
@@ -113,4 +120,39 @@ func decodeInteger(data []byte) (int64, int, error) {
 		pos++
 	}
 	return sign * res, pos + 2, nil
+}
+
+func decodeSimpleError(data []byte) (string, int, error) {
+	return decodeSimpleString(data)
+}
+
+func decodeBulkString(data []byte) (string, int, error) {
+	var startPos int = 1
+	for data[startPos] != '\n' {
+		startPos++
+	}
+	startPos++
+
+	var endPos int = startPos
+	for data[endPos] != '\r' {
+		endPos++
+	}
+
+	return string(data[startPos:endPos]), endPos + 2, nil
+}
+
+func decodeArray(data []byte) ([]interface{}, int, error) {
+	arrSize, ind, _ := decodeInteger(data)
+	var arr []interface{} = make([]interface{}, 0, arrSize)
+	// log.Printf("%q", data)
+	var elementCount int64 = 0
+	for elementCount < arrSize && ind < len(data) {
+		tempVal, tempInd, _ := Decode(data[ind:])
+		// log.Printf("%v", tempVal)
+		arr = append(arr, tempVal)
+		elementCount++
+		ind += tempInd
+	}
+	// log.Printf("%v", arr)
+	return arr, ind, nil
 }
